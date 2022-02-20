@@ -65,7 +65,8 @@ function _Mt:_new(desc)
             _passed = 0,
             _plan = -1,
             _level = self._level + 1,
-            _desc = desc
+            _desc = desc,
+            _is_dr_tap = true,
         },
         getmetatable(self)
     )
@@ -123,8 +124,10 @@ function _Mt:test(cb, desc)
         end
     else
         if status and not failed then
+            self._total = self._total + 1
             self._passed = self._passed + 1
         else
+            self._total = self._total + 1
             self._failed = self._failed + 1
         end
     end
@@ -361,8 +364,6 @@ end
 local res = _M:_new(debug.getinfo(3).short_src)
 res._level = -1
 
-
-
 -- exit code
 getmetatable(newproxy(true)).__gc = function()
     local stat = res:stat()
@@ -371,5 +372,19 @@ getmetatable(newproxy(true)).__gc = function()
     end
 end
 
+return {
+    _is_dr_tap = true,
+    test = function(...)
+        local args = {...}
 
-return res
+        local self, cb, desc = args[1], args[2], args[3]
+
+        if type(self) == 'table' and self._is_dr_tap then
+            return res:test(cb, desc)
+        end
+
+        cb, desc = args[1], args[2]
+        return res:test(cb, desc)
+    end
+}
+

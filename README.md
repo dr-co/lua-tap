@@ -14,9 +14,15 @@ tap:test(
 		tap:le(1, 2, '1 < 2')
 		tap:is(25, 25, '25 is 25')
 	end
-end
+end)
 
 ```
+
+## Features
+
+- You don't need look after exitcode.
+
+- Lua 5.1 (may be 5.x, I don't know)
 
 ## Tests
 

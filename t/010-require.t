@@ -5,13 +5,13 @@ local tap = require 'dr.tap'
 
 tap:test(
     function(tap)
-        -- tap:plan(3)
+        tap:plan(3)
         tap:passed('passed test')
 
         tap:test(
             function(tap)
                 tap:plan(1, 'привет')
-                tap:passed('subtest')
+                tap:passed()
             end
         )
         
