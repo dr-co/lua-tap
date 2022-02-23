@@ -237,6 +237,46 @@ function _Mt:is(value, expected, desc)
     return false
 end
 
+function _Mt:like(got, pattern, desc)
+    if desc == nil then
+        desc = 'Check if the string is equivalent to the pattern'
+    end
+
+    if string.match(tostring(got), pattern) then
+        return self:passed(desc)
+    end
+    
+    self:failed(desc)
+    self:diag(self:_make_caller())
+    self:diag(
+        string.format('got value <%s>: %s', type(got), self:dump(got))
+    )
+    self:diag(
+        string.format('  pattern <%s>: %s', type(pattern), self:dump(pattern))
+    )
+    return false
+end
+
+function _Mt:unlike(got, pattern, desc)
+    if desc == nil then
+        desc = "Check if the string isn't equivalent to the pattern"
+    end
+
+    if not string.match(tostring(got), pattern) then
+        return self:passed(desc)
+    end
+    
+    self:failed(desc)
+    self:diag(self:_make_caller())
+    self:diag(
+        string.format('  got value <%s>: %s', type(got), self:dump(got))
+    )
+    self:diag(
+        string.format('antipattern <%s>: %s', type(pattern), self:dump(pattern))
+    )
+    return false
+end
+
 function _Mt:isnt(value, expected, desc)
     if desc == nil then
         desc = 'Unexpected value test'
@@ -251,6 +291,25 @@ function _Mt:isnt(value, expected, desc)
         string.format('got value <%s>: %s', type(value), self:dump(value))
     )
     self:diag(' expected: anything else')
+    return false
+end
+
+function _Mt:isa(value, type_name, desc)
+    if desc == nil then
+        desc = 'Check if type(value) is ' .. tostring(type_name)
+    end
+    
+    if type(value) == type_name then
+        return self:passed(desc)
+    end
+    self:failed(desc)
+    self:diag(self:_make_caller())
+    self:diag(
+        string.format('got value <%s>: %s', type(value), self:dump(value))
+    )
+    self:diag(
+        string.format('expected: <%s>', self:dump(type_name))
+    )
     return false
 end
 

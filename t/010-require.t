@@ -1,11 +1,11 @@
-#!/usr/bin/lua
+#!/usr/bin/lua5.1
 
 
 local tap = require 'dr.tap'
 
 tap:test(
     function(tap)
-        tap:plan(3)
+        tap:plan(4)
         tap:passed('passed test')
 
         tap:test(
@@ -33,6 +33,15 @@ tap:test(
                 tap:lt(11, 12)
             end,
             'named subtest 2'
+        )
+
+        tap:test(
+            function(tap)
+                tap:plan(3)
+                tap:like('Hello, world', '%w', 'like')
+                tap:unlike('Hello, world', '%w123', 'unlike')
+                tap:isa('Hello, world', 'string', 'isa')
+            end
         )
     end
 )
