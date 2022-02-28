@@ -76,8 +76,9 @@ function _Mt:test(cb, desc)
 
     local this = self:_new(desc)
 
-    if this._level > 0 and desc ~= nil then
+    if this._level >= 0 and desc ~= nil then
         this:note(this._desc)
+        this._desc_printed = true
     end
 
     local status, res = xpcall(
@@ -394,7 +395,9 @@ function _Mt:plan(plan, message)
         self:failed('Too late call :plan')
     else
         self._plan = plan
-        self:diag(self._desc)
+        if not self._desc_printed then
+            self:diag(self._desc)
+        end
         self:_printf('1..%d', plan)
     end
 
@@ -420,30 +423,65 @@ function _Mt:stat()
 end
 
 
-local res = _M:_new(debug.getinfo(3).short_src)
-res._level = -1
 
--- exit code
-getmetatable(newproxy(true)).__gc = function()
-    local stat = res:stat()
-    if stat.status ~= 'ok' then
-        os.exit(1)
-    end
-end
+-- local tap = _M:_new(debug.getinfo(3).short_src)
+-- tap._level = -1
 
-return {
+
+local tap = {
+    _registered = {},
     _is_dr_tap = true,
-    test = function(...)
-        local args = {...}
-
-        local self, cb, desc = args[1], args[2], args[3]
-
-        if type(self) == 'table' and self._is_dr_tap then
-            return res:test(cb, desc)
-        end
-
-        cb, desc = args[1], args[2]
-        return res:test(cb, desc)
-    end
 }
 
+function tap.test(self, cb, desc)
+
+    if type(self) == 'function' then
+        desc = cb
+        cb = self
+        self = tap
+    end
+
+
+    table.insert(
+        self._registered,
+        {
+            cb = cb,
+            desc = desc,
+        }
+    )
+end
+
+local t = _M:_new(debug.getinfo(3).short_src)
+
+function tap:_run()
+
+    local code = 0
+
+    if #self._registered == 0 then
+        print('0..0 # no tests run')
+    elseif #self._registered == 1 then
+        t._level = -1
+    elseif #self._registered > 1 then
+        t:plan(#self._registered)
+        t._level = 0
+    end
+
+    for _, tst in pairs(self._registered) do
+        t:test(tst.cb, tst.desc)
+    end
+
+    if #self._registered > 0 then
+        if t:stat().status ~= 'ok' then
+            code = 1
+        end
+    end
+
+    os.exit(code)
+end
+
+
+getmetatable(newproxy(true)).__gc = function()
+    tap:_run()
+end
+
+return tap

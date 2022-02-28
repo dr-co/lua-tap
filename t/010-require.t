@@ -43,6 +43,8 @@ tap:test(
                 tap:isa('Hello, world', 'string', 'isa')
             end
         )
-    end
+    end,
+
+    'test 1'
 )
 
