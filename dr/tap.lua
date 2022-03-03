@@ -453,10 +453,9 @@ end
 
 local t = _M:_new(debug.getinfo(3).short_src)
 
-function tap:_run()
+local exitf = os.exit
 
-    local code = 0
-
+function tap:_run(code)
     if #self._registered == 0 then
         print('0..0 # no tests run')
     elseif #self._registered == 1 then
@@ -476,12 +475,43 @@ function tap:_run()
         end
     end
 
-    os.exit(code)
+    exitf(code)
 end
 
+setmetatable(tap, {
+    __gc = function()
+        tap:_run(0)
+    end
+})
 
 getmetatable(newproxy(true)).__gc = function()
-    tap:_run()
+        tap:_run(0)
 end
+
+
+if package.loaded.box ~= nil and package.loaded.box.ctl ~= nil then
+    local ffi = require 'ffi'
+
+    ffi.cdef[[
+        void _exit(int status);
+    ]]
+
+    exitf = function(code)
+        ffi.C._exit(code)
+    end
+
+    box.ctl.on_shutdown(
+        function()
+            tap:_run()
+        end
+    )
+end
+
+
+function os.exit(code)
+    tap:_run(code)
+    exitf(code)
+end
+
 
 return tap
