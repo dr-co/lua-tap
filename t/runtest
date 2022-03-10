@@ -1,0 +1,54 @@
+#!/bin/bash
+
+
+TEMP=`mktemp`
+trap "rm -f $TEMP" exit
+LUA=(luajit 'lua5.1' tarantool resty)
+
+TEST_NAME=$1
+
+
+failed=0
+
+echo "1..${#LUA[@]}"
+for luano in ${!LUA[@]}; do
+    lua=${LUA[$luano]}
+    luano=$(($luano + 1))
+    if ! which "$lua" &>/dev/null; then
+        echo "ok $luano # SKIP $lua - interpretator not found" 
+        continue
+    fi
+    oktest=1        
+    {
+        echo "# $lua" > $TEMP
+        if ! $lua "$@" &>>$TEMP; then
+            oktest=0
+        fi
+        
+    } 
+
+
+    AWAIT_CODE=1
+
+    if echo $TEST_NAME|grep -qE '\.f\.t$'; then
+
+        AWAIT_CODE=0
+        sed -E 's/^/  # /g' $TEMP
+    else
+        sed -E 's/^/  /g' $TEMP
+    fi
+
+
+    if test $oktest -eq $AWAIT_CODE; then
+        echo "ok $luano - $lua"
+    else
+        echo "not ok $luano - $lua"
+        failed=$(($failed + 1))
+    fi
+done
+
+if test $failed -gt 0; then
+    echo "# Looks like you failed $failed tests of ${#LUA[@]}"
+    exit 1
+fi
+
