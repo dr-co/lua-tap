@@ -558,7 +558,7 @@ end
 local function process_exit(tap)
     local exitf = os.exit
 
-    _G._tap_gc_for_onexit = newproxy(true)
+    rawset(_G, '_tap_gc_for_onexit',  newproxy(true))
     getmetatable(_G._tap_gc_for_onexit).__gc = function()
         tap._done(0, exitf)
     end
