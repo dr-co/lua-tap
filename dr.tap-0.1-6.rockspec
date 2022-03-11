@@ -1,5 +1,5 @@
 package = "dr.tap"
-version = "0.1-4"
+version = "0.1-6"
 source = {
    url = "git+https://github.com/dr-co/lua-tap",
    branch = "master"

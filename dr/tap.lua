@@ -317,7 +317,7 @@ function checks.like(self, got, pattern, desc)
     if pos  ~= nil then
         return self.passed(desc)
     end
-    
+
     self.failed(desc)
     self.diag(self._make_caller())
     self.diag(
@@ -333,7 +333,7 @@ function checks.unlike(self, got, pattern, desc)
     if desc == nil then
         desc = "Check if the string isn't equivalent to the pattern"
     end
-    
+
     local pos = string.find(tostring(got), tostring(pattern))
 
     if pos  == nil then
@@ -372,7 +372,7 @@ function checks.isa(self, value, type_name, desc)
     if desc == nil then
         desc = 'Check if type(value) is ' .. tostring(type_name)
     end
-    
+
     if type(value) == type_name then
         return self.passed(desc)
     end
@@ -500,7 +500,9 @@ function methods._done(self, code, exitf)
     local stat = self.stat()
 
     local failed = self._make_footer()
-        
+
+    io.flush()
+
     if failed then
         exitf(1)
     end
@@ -510,7 +512,7 @@ end
 
 local function process_exit(tap)
     local exitf = os.exit
-    
+
     getmetatable(newproxy(true)).__gc = function()
         tap._done(0, exitf)
     end

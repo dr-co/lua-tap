@@ -3,7 +3,7 @@
 
 TEMP=`mktemp`
 trap "rm -f $TEMP" exit
-LUA=(luajit 'lua5.1' tarantool resty)
+LUA=(tarantool luajit resty 'lua5.1')
 
 TEST_NAME=$1
 
@@ -20,8 +20,8 @@ for luano in ${!LUA[@]}; do
     fi
     oktest=1        
     {
-        echo "# $lua" > $TEMP
-        if ! $lua "$@" &>>$TEMP; then
+        printf '# ====== %-10s =======\n' $lua
+        if ! $lua "$@" > $TEMP 2>&1; then
             oktest=0
         fi
         
@@ -31,7 +31,6 @@ for luano in ${!LUA[@]}; do
     AWAIT_CODE=1
 
     if echo $TEST_NAME|grep -qE '\.f\.t$'; then
-
         AWAIT_CODE=0
         sed -E 's/^/  # /g' $TEMP
     else
@@ -40,9 +39,9 @@ for luano in ${!LUA[@]}; do
 
 
     if test $oktest -eq $AWAIT_CODE; then
-        echo "ok $luano - $lua"
+        echo "ok $luano - $lua $@"
     else
-        echo "not ok $luano - $lua"
+        echo "not ok $luano - $lua $@"
         failed=$(($failed + 1))
     fi
 done
