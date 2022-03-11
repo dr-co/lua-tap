@@ -77,40 +77,74 @@ setmetatable(
 )
 
 
-function methods.dump(self, value)
+function methods.dump(self, value, quote_key)
     if value == nil then
         return 'nil'
     end
     if type(value) == 'number' then
+        if quote_key then
+            return string.format('[%s]', tostring(value))
+        end
         return tostring(value)
     end
 
     if type(value) ~= 'table' then
+        value = tostring(value)
+
+        if quote_key then
+            if value:match('^%a%w*$') ~= nil then
+                return value
+            else
+                return string.format('[%s]', self.dump(value))
+            end
+        end
         return string.format('"%s"',
-            tostring(value)
-                :gsub('\\', '\\\\')
-                :gsub('"', '\\"')
+                value
+                    :gsub('\\', '\\\\')
+                    :gsub('"', '\\"')
         )
     end
 
-    local s = '{'
-    local comma = false
+
+    local tlen = #value
+    local tlen_c = 0
+    local index = 0
+
+    for k, v in pairs(value) do
+        index = index + 1
+        if type(k) ~= 'number' or index ~= k then
+            tlen_c = tlen + 1
+            break
+        end
+        tlen_c = tlen_c + 1
+    end
+
+    local s, comma = '{', false
+    
+    if tlen_c == tlen then
+        for k, v in pairs(value) do
+            if comma then
+                s = s .. ', '
+            end
+            comma = true
+            s = s .. self.dump(v)
+        end
+        s = s .. '}'
+        return s
+    end
 
     for k, v in pairs(value) do
         if comma then
             s = s .. ', '
         end
-        if type(k) ~= 'number' then
-            k = self.dump(k)
-        end
         s = s .. string.format(
-            '[%s] = %s',
-            k,
+            '%s = %s',
+            self.dump(k, true),
             self.dump(v)
         )
         comma = true
     end
-    return s .. '} '
+    return s .. '}'
 end
 
 function methods._new(self, desc)
