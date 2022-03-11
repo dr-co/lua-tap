@@ -47,7 +47,14 @@ local tests = {
         desc = 'mix table nokw keys'
     },
 
+    {
+        v = string.char(1) .. string.char(2),
+        d = '"\\x01\\x02"',
+        desc = 'dump \\x01\\x02',
+    },
 }
+
+tap.plan(#tests)
 
 for _, t in pairs(tests) do
     tap.is(

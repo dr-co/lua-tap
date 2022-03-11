@@ -98,11 +98,22 @@ function methods.dump(self, value, quote_key)
                 return string.format('[%s]', self.dump(value))
             end
         end
-        return string.format('"%s"',
-                value
-                    :gsub('\\', '\\\\')
-                    :gsub('"', '\\"')
-        )
+
+        value = value:gsub('\\', '\\\\'):gsub('"', '\\"')
+
+        local res = ''
+        for no = 1, #value do
+            local c = string.sub(value, no, no)
+            local code = string.byte(c)
+
+            if code < 0x20 then
+                res = res .. string.format('\\x%02x', code)
+            else
+                res = res .. c
+            end
+        end
+
+        return string.format('"%s"', res)
     end
 
 
