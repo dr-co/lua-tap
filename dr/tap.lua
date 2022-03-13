@@ -501,6 +501,30 @@ function checks.ge(self, a, b, desc)
     return false
 end
 
+function checks.require_ok(self, module_name, desc, verbose)
+    module_name = tostring(module_name)
+    if desc == nil then
+        desc = string.format('require "%s"', module_name)
+    end
+
+    local status, res = xpcall(
+        function() require(module_name) end,
+        debug.traceback
+    )
+
+    if not status then
+        self.failed(desc)
+        if verbose then
+            self.diag(tostring(res))
+        else
+            self.diag(self._make_caller())
+        end
+        return false
+    end
+    self.passed(desc)
+    return res
+end
+
 function methods.plan(self, plan, message)
 
     assert(plan >= 0)

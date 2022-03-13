@@ -48,6 +48,8 @@ end)
 
 New subtest block.
 
+### tap:require_ok(module_name[, description])
+
 ### tap:note(...)
 
 Print note message (TAP protocol)
