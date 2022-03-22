@@ -144,7 +144,25 @@ function methods.dump(self, value, quote_key)
         return s
     end
 
+    local sorted = {}
+
     for k, v in pairs(value) do
+        table.insert(sorted, {k = k, v = v})
+    end
+    table.sort(
+        sorted,
+        function(a, b)
+            local ok, rv = pcall(function() return a.k < b.k end)
+            if ok then
+                return rv
+            end
+            return tostring(a.k) < tostring(b.k)
+        end
+    )
+
+
+    for _, srt in pairs(sorted) do
+        local k, v = srt.k, srt.v
         if comma then
             s = s .. ', '
         end

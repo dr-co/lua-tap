@@ -36,8 +36,8 @@ local tests = {
         desc = 'array of string and numbers'
     },
     {
-        v = {123, hello='world'},
-        d = '{[1] = 123, hello = "world"}',
+        v = {y = 123, 123, hello='world'},
+        d = '{[1] = 123, hello = "world", y = 123}',
         desc = 'mix table'
     },
     
