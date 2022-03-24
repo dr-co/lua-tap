@@ -526,7 +526,7 @@ function checks.require_ok(self, module_name, desc, verbose)
     end
 
     local status, res = xpcall(
-        function() require(module_name) end,
+        function() return require(module_name) end,
         debug.traceback
     )
 
