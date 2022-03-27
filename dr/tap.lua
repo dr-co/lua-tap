@@ -92,7 +92,7 @@ function methods.dump(self, value, quote_key)
         value = tostring(value)
 
         if quote_key then
-            if value:match('^%a%w*$') ~= nil then
+            if value:match('^%a[%w_]*$') ~= nil then
                 return value
             else
                 return string.format('[%s]', self.dump(value))
@@ -351,6 +351,40 @@ function checks.ok(self, cond, desc)
     return false
 end
 
+function checks.isnil(self, value, desc)
+    if desc == nil then
+        desc = 'True condition'
+    end
+
+    if value == nil then
+        return self.passed(desc)
+    end
+
+    self.failed(desc)
+    self.diag(self._make_caller())
+    self.diag(
+        string.format('got value <%s>: %s', type(value), self.dump(value))
+    )
+    self.diag('expected: nil')
+    return false
+end
+
+function checks.isntnil(self, value, desc)
+    if desc == nil then
+        desc = 'True condition'
+    end
+
+    if value ~= nil then
+        return self.passed(desc)
+    end
+
+    self.failed(desc)
+    self.diag(self._make_caller())
+    self.diag('got value: nil')
+    self.diag(' expected: anything else')
+    return false
+end
+
 function checks.is(self, value, expected, desc)
     if desc == nil then
         desc = 'Expected value test'
@@ -369,6 +403,8 @@ function checks.is(self, value, expected, desc)
     )
     return false
 end
+
+checks.eq = checks.is
 
 function checks.like(self, got, pattern, desc)
     if desc == nil then

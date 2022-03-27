@@ -52,6 +52,11 @@ local tests = {
         d = '"\\x01\\x02"',
         desc = 'dump \\x01\\x02',
     },
+    {
+        v = {he_llo='world'},
+        d = '{he_llo = "world"}',
+        desc = 'underscore in keys'
+    },
 }
 
 tap.plan(#tests)
