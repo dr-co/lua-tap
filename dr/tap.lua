@@ -62,12 +62,17 @@ setmetatable(
 
             return function(arg1, ...)
 
-                local args
+                local args = {self}
 
                 if arg1 == self then
-                    args = {self, ...}
+                    for i = 1, select('#', ...) do
+                        args[i + 1] = select(i, ...)
+                    end
                 else
-                    args = {self, arg1, ...}
+                    args[2] = arg1
+                    for i = 1, select('#', ...) do
+                        args[i + 2] = select(i, ...)
+                    end
                 end
 
                 return cb(unpack(args))
